@@ -75,14 +75,14 @@ def tick():
                 kill(task.id)
 
 
-def job_list():
+def list_jobs():
     """
     lists all of the jobs in the scheduler
     """
     return _job_registry.items()
 
 
-def wait_list():
+def list_waiting():
     """
     list all the jobs waiting on other jobs
     """
