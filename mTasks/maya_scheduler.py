@@ -10,7 +10,7 @@ _state = {
 def sj_indices():
     return set(int(i.partition(":")[0]) for i in scriptJob(lj=True))
 
-def start_scheduler():
+def start():
     if _state.get('job') in sj_indices():
         # scheduler is already running
         return
@@ -19,16 +19,16 @@ def start_scheduler():
 
 
 
-def suspend_scheduler():
+def suspend():
     existing = _state.get('job')
     if existing in sj_indices():
         scriptJob(k=existing)
         _state['job'] = -1
 
 
-def stop_scheduler():
+def stop():
     '''
     stop the scheduler and release any still-active tasks
     '''
-    suspend_scheduler()
+    suspend()
     scheduler.reset()

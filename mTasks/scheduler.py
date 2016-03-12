@@ -107,4 +107,4 @@ def reset():
     _join_list = collections.defaultdict(list)
 
 
-__all__ = 'spawn kill join signal tick run reset wait_list job_list'.split()
+__all__ = 'spawn kill join signal tick run reset list_jobs list_waiting'.split()

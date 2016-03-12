@@ -7,5 +7,5 @@ entirely within the main Maya thread, it will not create cross-thread access bug
 
 from scheduler import *
 from timers import delay, repeat, after
-import maya_scene as maya
+import maya_scheduler as task_system
 
