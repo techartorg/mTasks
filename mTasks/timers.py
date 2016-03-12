@@ -1,8 +1,8 @@
 import time
 
-class Delay(object):
+class DelayTimer(object):
     """
-    return false until (duration) seconds from instation time
+    return false until (duration) seconds from instantiation time
     """
     __slots__ = 'expiry'
 
@@ -27,7 +27,7 @@ class Delay(object):
         return wrapper
 
 
-class After(Delay):
+class AwaitTimer(DelayTimer):
     """
     return false until the specified time
     """
@@ -39,11 +39,11 @@ class After(Delay):
 
 
 def delay(fn, delay_time):
-    return Delay.create(fn, delay_time)
+    return DelayTimer.create(fn, delay_time)
 
 
 def after(fn, start_time):
-    return After.create(fn, start_time)
+    return AwaitTimer.create(fn, start_time)
 
 
 def repeat(fn, initial_delay, repeat_delay, repeats):
@@ -53,7 +53,7 @@ def repeat(fn, initial_delay, repeat_delay, repeats):
         repetitions = int(repeats)
         forever = repeats == 0
 
-        start_delay = Delay(initial_delay)
+        start_delay = DelayTimer(initial_delay)
         while start_delay:
             yield
 
@@ -63,7 +63,7 @@ def repeat(fn, initial_delay, repeat_delay, repeats):
             try:
                 yield inner.next()
             except StopIteration:
-                wait_again = Delay(repeat_delay)
+                wait_again = DelayTimer(repeat_delay)
                 while wait_again:
                     yield
 
@@ -74,4 +74,4 @@ def repeat(fn, initial_delay, repeat_delay, repeats):
     return wrapper
 
 
-__all__ = 'delay repeat after'.split()
+__all__ = 'delay repeat after DelayTimer AwaitTimer'.split()
