@@ -12,11 +12,13 @@ _ready_queue = Queue.Queue()
 _job_registry = {}
 _signal_list = {}
 _join_list = collections.defaultdict(list)
+_await_list = collections.defaultdict(list)
 
 
 def spawn(coroutine, callback=None):
     """
     add a new task for function <coroutine>, with optional <callback> function
+    if defer is True, the task will not be started immediately
 
     returns the id of the new task
     """
@@ -25,31 +27,48 @@ def spawn(coroutine, callback=None):
     _ready_queue.put(new_task)
     return new_task.id
 
+def defer_spawn(coroutine, callback=None):
+    """
+    Create a task without starting it -- used to create tasks for joins
+    """
+    new_task = Task(coroutine, callback)
+    _job_registry[new_task.id] = new_task
+    return new_task.id
+
 
 def kill(task_id):
     """
     remove task <task_id> from the systems
     """
-
     result = _job_registry.pop(task_id, None)
     _signal_list.pop(task_id, None)
+
     if result:
-        waiters = _join_list.pop(result.id, tuple())
-        for task_id in waiters:
-            _ready_queue.put(task_id)
-            _job_registry[task_id.id] = task_id
+        deferred_tasks = _join_list.pop(result.id, tuple())
+        for deferred_task in deferred_tasks:
+            _await_list[deferred_task].remove(task_id)
+            if not _await_list[deferred_task]:
+                _await_list.pop(deferred_task)
+                waiting_task = _job_registry.get(deferred_task)
+                _ready_queue.put(waiting_task)
     return result
 
 
-def join(existing_task, coroutine, callback=None):
+
+def join(existing_task, joining_task):
     """
-    spawn a new task for function <coroutine> which will be triggered on the completion of task with id <existing_task>
+    make task with id <joining task> dependent on task with id <existing task>.  Returns the ids
+    of all the tasks on which <joining task> depends
     """
     if not existing_task in _job_registry:
         raise RuntimeError("No active task: %s" % existing_task)
-    joined = Task(coroutine, callback)
-    _join_list[existing_task].append(joined)
-    return joined.id
+    if not joining_task  in _job_registry:
+        raise RuntimeError("No active task: %s" % joining_task)
+
+    _join_list[existing_task].append(joining_task)
+    _await_list[joining_task].append(existing_task)
+
+    return _await_list[joining_task]
 
 
 def signal(task_id, message):
@@ -107,4 +126,4 @@ def reset():
     _join_list = collections.defaultdict(list)
 
 
-__all__ = 'spawn kill join signal tick run reset list_jobs list_waiting'.split()
+__all__ = 'spawn defer_spawn kill join signal tick run reset list_jobs list_waiting'.split()
