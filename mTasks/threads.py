@@ -5,7 +5,7 @@ from timers import *
 
 from Queue import Queue
 
-class ThreadJob(object):
+class ExternalTask(object):
 
     def __init__(self, thread_function, callback = None, timeout = 0):
 
@@ -48,12 +48,12 @@ class ThreadJob(object):
         task_logger.info("thread job completed")
 
 
-class ThreadResultJob(ThreadJob):
+class ExternalResultTask(ExternalTask):
     def __init__(self, thread_function, item_callback = None, result_callback = None, timeout = 0):
 
         self.result_queue = Queue()
         self.result_callback = result_callback
-        super(ThreadResultJob, self).__init__(thread_function, item_callback, timeout )
+        super(ExternalResultTask, self).__init__(thread_function, item_callback, timeout )
 
     def wrap_thread(self, fn):
         def signal_done():

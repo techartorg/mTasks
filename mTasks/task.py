@@ -6,11 +6,20 @@ task_logger = logging.getLogger('mTask')
 
 
 class Task(object):
+    '''
+    Wraps a maya coroutine function.
+
+    Typically you won't construct these yourself, they are created by scheduler when calling 'spawn' or 'join'
+    '''
     __slots__ = ('id', 'fn', 'state', 'callback')
     _next_id = 0
 
     def __init__(self, fn, callback=None):
+
+        # this will except if <fn> is not a coroutine or generator function
+        # that can yield
         assert inspect.isgeneratorfunction(fn) or hasattr(fn, "__call__")
+
         Task._next_id += 1
         self.id = Task._next_id
         self.fn = fn()

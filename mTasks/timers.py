@@ -2,7 +2,16 @@ import time
 
 class DelayTimer(object):
     """
-    return false until (duration) seconds from instantiation time
+    return True until (duration) seconds from instantiation time.  The usual idiom is
+
+        ... do something...
+
+        waiting = DelayTimer(2.5)
+        while waiting:
+            yield
+
+        ... do more stuff ...
+
     """
     __slots__ = 'expiry'
 
@@ -29,7 +38,7 @@ class DelayTimer(object):
 
 class AwaitTimer(DelayTimer):
     """
-    return false until the specified time
+    return True until the specified time
     """
 
     __slots__ = 'expiry'
@@ -39,14 +48,29 @@ class AwaitTimer(DelayTimer):
 
 
 def delay(fn, delay_time):
+    """
+    returns <fn> wrapped with a built-in delay of <delay_time> seconds.  When scheduled,
+    <fn> will wait for <delay_time> seconds before beginning.
+    """
     return DelayTimer.create(fn, delay_time)
 
 
 def after(fn, start_time):
+    """
+    returns <fn> wrapped with a built-in delay timer that won't fire until <start time>
+
+    <start time> is expressed in python seconds (the same format as time.time())
+    """
     return AwaitTimer.create(fn, start_time)
 
 
 def repeat(fn, initial_delay, repeat_delay, repeats):
+    """
+    returns <fn> wrapped with a delay timer and a repeat timer.  When scheduled, <fn> will wait for
+    <initial_delay> seconds and fire. When completed, it will wait for <repeat_delay> seconds before
+    starting again. It will continue for <repeats> repeats.  If repeats is set to 0, the function
+    will repeat forever.
+    """
     def wrapper():
         # have to make new values here, 'repeats'
         # can't be reassigned in a closure!
