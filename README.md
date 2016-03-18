@@ -95,8 +95,7 @@ You can find all of the running tasks with `list_jobs()`.  Each job is assigned 
 Scheduling
 ----------
 
-The `spawn` function adds a callable to the mTasks system, starting it immediately (see `tick()`, below).  You can also queue up functions to to run when other functions
-complete.  For example:
+The `spawn` function adds a callable to the mTasks system, starting it immediately (see `tick()`, below).  You can also queue up functions to to run when other functions complete by using `defer_spawn()` -- which creates a task without running it -- and `join()`, which like a traditional thread join, waits for one task to finish before starting another.  For example:
 
     def hello():
         print "hello"
