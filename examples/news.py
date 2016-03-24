@@ -96,10 +96,10 @@ def news_reader():
             new_item = result_queue.get()
             cmds.textScrollList(display_list, e = True, append = new_item)
 
-    # the ThreadResultJob object will start the thread and share a python Queue object
+    # the AsyncPollTask object will start the thread and share a python Queue object
     # between the news reader thread and the callback which publishes the results to the gui
 
-    news_thread = mTasks.threads.ExternalResultTask(poll_news, item_callback=update_job)
+    news_thread = mTasks.threads.AsyncPollTask(poll_news, update_job)
     mTasks.spawn(news_thread)
 
 # start the task system and open the reader
